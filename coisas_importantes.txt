@@ -1,0 +1,61 @@
+schema_json_string = "{\n"
+schema_json_string += "  \"title\": \"Título do cenário\",\n"
+schema_json_string += "  \"messages\": [\n"
+schema_json_string += "    {\"number\": 1, \"content\": \"Descreva detalhadamente a ambientação do mundo (vilas, reinos, clima, cultura, povos, lugares) sem mensionar o que ocorrerá no futuro ou quem fará a mudança. Sempre iniciando com: 'Em um mundo onde ...'.\"},\n"
+schema_json_string += "    {\"number\": 2, \"content\": \"Deve apenas descrever como o mundo está **agora**, destacando o que mudou, e explicar em detalhes o evento ou personagem que levou o mundo a esse estado. Sempre iniciando com: 'Mas agora, ...'\"},\n"
+schema_json_string += "    {\"number\": 3, \"content\": \"Descreva apenas a ação necessária para resolver o estado atual, com no máximo 1 ação ou objetivo. Não inclua consequências do fracasso nem quem deve executar a ação. Sempre comece com: 'É necessário ...'\"},\n"
+schema_json_string += "    {\"number\": 4, \"content\": \"Deve explicar as consequências caso o objetivo não seja cumprido, ligando ela **ao que aconteceu**.\"}\n"
+schema_json_string += "  ],\n"
+schema_json_string += "  \"antagonist\": \"Nome do antagonista\",\n"
+schema_json_string += "  \"characters\": [\n"
+
+for i in range(len(cenas[1])): 
+    schema_json_string += f"    {{\"name\": \"Nome para um personagem '{cenas[1][i][1]}'.\"}}"
+    if i < len(cenas[1]) - 1: 
+        schema_json_string += ","
+    schema_json_string += "\n"
+
+schema_json_string += "  ],\n"
+schema_json_string += "  \"locations\": [\n"
+for i in range(len(cenas[0])): 
+    schema_json_string += f"    {{\"name\": \"Nome para um local do tipo '{cenas[0][i]}'\"}}"
+    if i < len(cenas[0]) - 1: 
+        schema_json_string += ","
+    schema_json_string += "\n"
+schema_json_string += "  ],\n"
+schema_json_string += "  \"objective\": \"Informe brevemente o objetivo principal, começando com: 'O objetivo principal é ...'\"\n"
+schema_json_string += "}"
+
+
+introducao_schema = json.loads(schema_json_string)
+
+
+########################3
+
+## Instruções:
+1. Crie quatro cenas principais, incluindo: Introdução, Desenvolvimento, Clímax Preparatório e Desfecho.
+2. Divida o objetivo principal de {story.objective}, em quatro etapas ou cenas. Certifique-se de que as cenas tenham um bom ritmo e progressão lógica.
+2. Qual será o objetivo de cada cena.
+    - Introdução: Estabeleça o objetivo inicial, como obter informações básicas, identificar a origem do problema ou adquirir pistas essenciais para avançar.
+    - Desenvolvimento: Crie objetivos intermediários que impulsionem a trama, como recuperar um item, negociar com uma figura importante ou superar um obstáculo relevante.
+    - Clímax Preparatório: Introduza objetivos que aumentem a tensão, como enfrentar desafios mais complexos, obter recursos críticos ou revelar verdades importantes para o desfecho.
+    - Desfecho: Defina o objetivo final, como resolver o conflito principal, superar o maior desafio ou garantir a conclusão bem-sucedida da missão.
+3. Descrever como a cena avança a narrativa em direção à conclusão.
+4. Obstáculos que os jogadores encontrarão.
+5. Um gancho que conecta a cena à próxima.
+
+## Saída Esperada:"""
+
+objective_schema = (
+"Você deve responder em formato JSON seguindo o seguinte esquema:\n"
+"{\n"
+"  \"objectives\": [\n"
+"    {\n"
+"      \"objective\": \"Informe brevemente o objetivo para a cena, começando com: 'O objetivo dessa cena é ...'\",\n"
+"      \"description\": \"uma breve descrição, de como realiza o objetivo.\",\n"
+"      \"Connection_next_scene\": \"Descrição detalhada, sobre a conexão da cena atual com a proxima cena.\",\n"
+"      \"scenes\":  \"Em qual cena o objetivo aparece: Introdução, Desenvolvimento, Clímax Preparatório, Desfecho.\",\n"
+"    }\n"
+"  ]\n"
+"}"
+)
