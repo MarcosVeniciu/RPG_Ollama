@@ -87,3 +87,14 @@ system_prompt = "Você é um Dungeon Master especialista em criação de nomes p
 
 personagens_cenas = model_response(system_prompt, promtpt_names, names_schema, NameGenerator)
 personagens_cenas.model_dump()
+
+
+
+1. Crie nomes para os personagens e os locais informados em Types of places e Role of the characters.
+1. Use exclusivamente os elementos fornecidos na **Tabela de Elementos**.
+2. Os nomes devem ter **exatamente duas palavras**.
+3. Para o nome de characters, a first_name deve combinar Prefixo + Raiz.
+4. Para o nome de characters, a last_name deve combinar Raiz + Sufixo.
+5. Para o nome de locations, a first_word deve refletir a **Localização** para definir o tipo de lugar.
+6. Para o nome de locations, a second_word deve combinar Prefixo + Raiz + (opcionalmente Sufixo).
+7. O nome deve refletir um conceito significativo, inspirado nos significados dos elementos, adequado ao papel do personagem ou à natureza do lugar.
