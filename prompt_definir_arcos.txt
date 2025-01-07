@@ -1,0 +1,120 @@
+lista_arcos = []
+for i in range(4):
+    arco = ""
+    if i ==3: # o ultimo arco
+        arco += f"""## Arco Final - Clímax\nEm {lugares[i]}, {Eventos[i]}.\nObjetivo atual: {objetivos[i]}\n\n""" 
+    else:
+        arco += f"""## Arco Atual\nEm {lugares[i]}, {Eventos[i]}.\nObjetivo atual: {objetivos[i]}\n\n""" 
+
+    if i < 3: # o ultimo arco não tem proximo arco.
+        arco += f"""## Próximo Arco\nEm {lugares[i+1]}, {Eventos[i+1]}.\nObjetivo atual: {objetivos[i+1]}"""
+    
+    lista_arcos.append(arco)
+
+detalhes_relevantes = ""
+for detalhes in introducao.pre_event_world.relevant_details:
+    detalhes_relevantes += f"{detalhes} \n"
+
+pistas = ""
+for pistas in introducao.objective.clues:
+    pistas += f"{pistas} \n"
+
+lista_aventura = []
+for arco_atual in range(4):
+    print(f"Arco: {arco_atual}")
+    prompt_arcos = f"""## General Description:
+        * Description:
+            {introducao.pre_event_world.general_description}
+        * Relevant Details:
+            {detalhes_relevantes}
+        * objective principal:
+            {introducao.objective.main_objective}
+        * Clues:
+            {pistas}
+        * Consequences:
+            - Sucesso: {introducao.consequences.success}
+            - Falha: {introducao.consequences.failure}
+
+    {lista_arcos[arco_atual]}    
+
+    ## Instruções:
+
+    1. Planeje uma sequência de scenes para o arco atual.
+
+    2. Planeje uma sequência de eventos ou encontros variados que desafiem os jogadores ao longo do arco.
+    
+    3. Defina um objetivo claro para cada cena do arco atual, alinhado à narrativa geral. 
+        * Pergunta-chave: O que os jogadores devem alcançar neste arco?
+        * Especifique o problema central que será apresentado na cena.
+
+    4. Finalize o arco com um evento marcante que conecte logicamente ao **próximo arco**, integrando o próximo local e objetivo descritos.
+
+    5. Seja detalhado e específico, mas mantenha a descrição concisa para criar uma experiência envolvente e clara para os jogadores.
+
+    6. **Gere a saída somente para o arco atual**, sem incluir informações adicionais de outros arcos.
+
+    7. Escreva um resumo narrativo do arco atual, detalhando:
+        * As ações dos jogadores e os desafios enfrentados.
+        * Os locais visitados, suas características e a atmosfera geral.
+        * As pistas descobertas e sua relevância para a narrativa.
+        * Como os eventos do arco atual levam logicamente ao próximo arco.
+        * Use um tom envolvente e mantenha a coesão narrativa.
+
+    8. Quando chegar ao **arco final** de uma conclusão a historia.
+
+    ## Saida
+    Você deve responder em formato JSON seguindo o seguinte esquema:\n"""
+
+    schema_json_string = "{\n"
+    schema_json_string += "  \"arcos\": [\n"
+    schema_json_string += "    {\n"
+    schema_json_string += "      \"title\": \"O título principal do arco atual, resumindo sua temática ou objetivo central, começando com: 'Arco: ...'.\",\n"
+    schema_json_string += "      \"objective\": \"O objective principal do arco, indicando o que os jogadores devem alcançar.\",\n"
+    schema_json_string += "      \"scenes\": [\n"
+    schema_json_string += "        {\n"
+    schema_json_string += "          \"local\": {\n"
+    schema_json_string += "            \"name\": \"O nome do local onde a cena atual ocorre.\",\n"
+    schema_json_string += "            \"description\": \"Uma descrição detalhada do local, incluindo suas características marcantes e atmosfera.\"\n"
+    schema_json_string += "          },\n"
+    schema_json_string += "          \"events\": [\n"
+    schema_json_string += "            \"Uma lista descritiva dos eventos que ocorrem nesta cena, descrevendo desafios, encontros ou revelações importantes.\"\n"
+    schema_json_string += "          ]\n"
+    schema_json_string += "        }\n"
+    schema_json_string += "      ],\n"
+    schema_json_string += "      \"summary\": \"Um detalhado resumo narrativo do arco atual em 6 frases.\",\n"
+    schema_json_string += "      \"cliffhanger\": \"Um evento ou revelação que conecta este arco ao próximo, mantendo o interesse dos jogadores.\"\n"
+    schema_json_string += "    }\n"
+    schema_json_string += "  ]\n"
+    schema_json_string += "}\n"
+
+    aventura_schema = json.loads(schema_json_string)
+
+    class Place(BaseModel):
+        name: str
+        description: str
+
+    class Scenes(BaseModel):
+        local: Place
+        events: List[str]
+
+    class Arco(BaseModel):
+        title: str
+        objective: str
+        scenes: List[Scenes]    
+        summary: str  
+        cliffhanger: str
+
+    class Aventura(BaseModel):
+        arcos: List[Arco]
+
+
+    system_prompt = """Você é um especialista em criação de histórias para RPG."""
+    tentativas=0
+    arcos = model_response(system_prompt, prompt_arcos, aventura_schema, Aventura)
+    while (arcos == None) and (tentativas<=4):
+        print("   Tentando novamente...")
+        arcos = model_response(system_prompt, prompt_arcos, aventura_schema, Aventura)
+        tentativas +=1
+    lista_aventura.append(arcos.model_dump())
+    if (arco_atual+1) < 4:
+        lista_arcos[arco_atual+1] = f"""## summary of the previous arc:\n{arcos.arcos[0].summary}\n\n{lista_arcos[arco_atual+1]}""" 

@@ -1,0 +1,89 @@
+tipo_lugares = ""
+for cena in cenas:
+    tipo_lugares += f" {cenas[cena]['lugar']};"
+
+base = f"{general_context.summary}"
+personagens_descrisao, lugares_descrisao = formatar_dados(cenas)
+
+promtpt_names = f"""Para todos os personagens, escolha um nome de acordo com sua role ou type e a sua importância na história.
+
+## Contexto geral:  
+{base}
+
+## Types of places:
+{tipo_lugares}
+
+## **Tabela de Elementos**:
+
+| **Prefixo** (Significado) | **Raiz** (Significado)  | **Sufixo** (Significado)  | **Localização** (Significado) |
+|---------------------------|-------------------------|---------------------------|-------------------------------|
+| Aure (Dourado)            | Magnus (Grande)         | ius (Homem)               | Castrum (Fortaleza)           |
+| Luci (Luz)                | Noct (Noite)            | us (Ser)                  | Silva (Floresta)              |
+| Cor (Coração)             | Fulg (Brilho)           | arius (Guardião)          | Portus (Porto)                |
+| Flavi (Amarelo)           | Tempest (Tempestade)    | or (Aquele que)           | Via (Estrada)                 |
+| Cael (Céu)                | Ignis (Fogo)            | ix (Portador)             | Cavernus (Caverna)            |
+| Domin (Senhor)            | Tenebris (Trevas)       | ens (Essência)            | Castellum (Castelo)           |
+| Viri (Força)              | Mortem (Morte)          | os (Ligado a)             | Oppidum (Vila)                |
+| Pax (Paz)                 | Bellum (Guerra)         | arum (Herdeiro)           | Regnum (Reino)                |
+| Aqua (Água)               | Vita (Vida)             | ana (Sagrado)             | Labyrinthus (Labirinto)       |
+| Terra (Terra)             | Lumina (Luz)            | ion (Criador)             | Templum (Templo)              |
+| Umbra (Sombra)            | Glacius (Gelo)          | eum (Lugar)               | Taberna (Taverna)             |
+| Ignia (Chama)             | Ventus (Vento)          | um (Refúgio)              | Arca (Veículo)                |
+| Vita (Vida)               | Nex (Morte)             | orium (Reino)             | Planus (Plano)                |
+| Tempora (Tempo)           | Statera (Equilíbrio)    | or (Aquele que)           | Spelunca (Masmorra)           |
+| Altus (Alto)              | Frigus (Frio)           | inis (Guardião)           | Desolatus (Lugar ermo)        |
+| Ignis (Fogo)              | Serenus (Calmo)         | itas (Estado de ser)      | Angiportus (Viela)            |
+| Solis (Sol)               | Ferox (Feroz)           | ilis (Capaz de)           | Iter (Estrada)                |
+| Lunaris (Lua)             | Venustus (Belo)         | atus (Marcado por)        | Urbs (Cidade)                 |
+
+
+## Istruções:
+
+1. Elementos Disponíveis: Use exclusivamente os elementos fornecidos na **Tabela de Elementos**.
+
+2. Os nomes devem ter apenas duas palavras.
+
+3. Não deve conter titulos.
+
+3. Estrutura de Nomes:
+    * Personagens: O nome deve ter duas palavras:
+        - Primeira palavra: Combinação de Prefixo + Raiz + (opcionalmente Sufixo).
+        - Segunda palavra: Combinação de Raiz + Sufixo.
+        - Formato Final: Crie um nome e sobrenome para cada personagem.
+    
+    * Lugares:
+        - Padrão de Tamanho: O nome deve indicar o tipo de lugar e seu nome:
+        - Primeira palavra: **Localização** (coluna da Tabela de Elementos) para definir o tipo de lugar, quando disponivel.
+        - Segunda palavra: Combinação de Prefixo + Raiz + (opcionalmente Sufixo).
+        - Formato Final: Crie o tipo de lugar (baseado em **Localização**) e o nome do lugar.
+
+4. O nome deve refletir um conceito significativo, inspirado nos significados dos elementos, adequado ao papel do personagem ou à natureza do lugar.
+
+5. Combinações e Ajustes: 
+    * Você pode combinar os elementos em qualquer ordem.
+    * Ajuste ligeiramente as terminações para melhorar a fluidez (ex.: "us" → "um").
+    
+
+6. Exemplos de Nomes:
+    * Personagem: "Valerius Magnus" (nome e sobrenome).
+    * Lugar: "Castrum Auremagnus" (fortaleza dourada). 
+    
+## Saída:
+Você deve responder em formato JSON seguindo o seguinte esquema:\n"""
+
+class Location(BaseModel):
+    name: str
+    type: str
+
+class Character(BaseModel):
+    name: str
+    role: str
+
+class NameGenerator(BaseModel):
+    characters: List[Character]
+    locations: List[Location]
+
+system_prompt = "Você é um Dungeon Master especialista em criação de nomes para RPG."
+
+personagens_cenas = model_response(system_prompt, promtpt_names, names_schema, NameGenerator)
+personagens_cenas.model_dump()
